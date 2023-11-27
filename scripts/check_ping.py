@@ -3,7 +3,7 @@ import json
 from halo import Halo
 
 def check_ping():
-    with open('self_healing_network/scripts/inventory.json', 'r') as file:
+    with open('self_healing_network/self_healing_network/scripts/inventory.json', 'r') as file:
         inventory = json.load(file)
 
     # Initializing the Halo spinner
@@ -15,7 +15,7 @@ def check_ping():
         response = ping(device['ip'], count=4)
         success = response.success()
         output = str(response)
-        ping_results.append({'device': device['name'], 'success': success})
+        ping_results.append({'device': device['name'], 'success': success, 'output': output})
 
     spinner.stop()  # Stopping the spinner once ping is complete
     return ping_results
