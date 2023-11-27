@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NetHealer - Self-Healing Network Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to NetHealer - Self-Healing Network Platform</h1>
+    </header>
+
+    <section id="monitoring">
+        <h2>Monitoring</h2>
+        <div id="ping-check">
+            <h3>Ping Check</h3>
+            <p>Click the button to perform the ping check:</p>
+            <button id="checkButton">Check ping</button>
+            <pre id="ping-result"></pre>
+        </div>
+        <!-- New DNS Check Section -->
+        <div id="dns-check">
+            <h3>DNS Check</h3>
+            <p>Click the button to perform the DNS check:</p>
+            <button id="checkDNSButton">Check DNS</button>
+            <pre id="dnsResult"></pre>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 NetHealer</p>
+    </footer>
+
+    <!-- JavaScript to handle button click and display results -->
+    <script>
+        document.getElementById('checkButton').addEventListener('click', function() {
+            fetch('/get_ping_results')  // Fetch ping results from Flask backend
+                .then(response => response.json())
+                .then(data => {
+                    // Check if 'ping_results' key exists and display the results
+                    if (data.hasOwnProperty('ping_results')) {
+                        const results = data['ping_results'];
+                        const resultDiv = document.getElementById('ping-result'); // Corrected ID
+                        resultDiv.innerHTML = ''; // Clear previous results
+    
+                        results.forEach(result => {
+                            const deviceName = result['device'];
+                            const success = result['success'];
+                            const output = result['output'];
+    
+                            const paragraph = document.createElement('p');
+                            paragraph.textContent = `Device: ${deviceName}, Success: ${success}, Output: ${output}`;
+                            resultDiv.appendChild(paragraph);
+                        });
+                    } else {
+                        // Handle if 'ping_results' key is not present in the received data
+                        console.error('Error: Invalid data received');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching ping results:', error);
+                });
+        });
+        document.getElementById('checkDNSButton').addEventListener('click', function() {
+            fetch('/check_dns')  // Fetch DNS results from Flask backend
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hasOwnProperty('dns_results')) {
+                        const dnsResults = data['dns_results'];
+                        const dnsResultDiv = document.getElementById('dnsResult');
+                        dnsResultDiv.innerHTML = '';
+
+                        dnsResults.forEach(result => {
+                            const domain = result['domain'];
+                            const resolvedIP = result['resolved_ip'];
+
+                            const paragraph = document.createElement('p');
+                            paragraph.textContent = `Domain: ${domain}, Resolved IP(s): ${Array.isArray(resolvedIP) ? resolvedIP.join(', ') : resolvedIP}`;
+                            dnsResultDiv.appendChild(paragraph);
+                        });
+                    } else {
+                        console.error('Error: Invalid data received for DNS results');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching DNS results:', error);
+                });
+        });
+    </script>
+</body>
+</html>
